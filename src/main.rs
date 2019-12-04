@@ -8,6 +8,7 @@ fn main() {
     solve_one_part_one();
     solve_one_part_two();
     solve_two_part_one();
+    solve_two_part_two();
 }
 
 fn load_day_one_data() -> impl Iterator<Item = i32> {
@@ -44,4 +45,9 @@ fn solve_two_part_one() {
     data[1] = 12;
     data[2] = 2;
     println!("Day 2 Part 1 Solution: {}", two::solve_part_one(&mut data));
+}
+
+fn solve_two_part_two() {
+    let data = load_day_two_data();
+    println!("Day 2 Part 2 Solution: {}", two::solve_part_two(data, 19690720));
 }

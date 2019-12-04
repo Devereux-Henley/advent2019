@@ -1,23 +1,50 @@
 //! Day 2
 pub fn solve_part_one(input: &mut [i32]) -> i32 {
-    let mut calculator = Calculator {
+    let mut computer = Computer {
         register: input,
         step: 0,
         execution_complete: false
     };
 
-    calculator.calculate();
+    computer.compute();
 
     input[0]
 }
 
-struct Calculator<'a> {
+pub fn solve_part_two(input: Vec<i32>, target: i32) -> i32 {
+    for noun in 0..99 {
+        for verb in 0..99 {
+            let mut copied_input = input.clone();
+
+            copied_input[1] = noun;
+            copied_input[2] = verb;
+
+            let mut computer = Computer {
+                register: &mut copied_input,
+                step: 0,
+                execution_complete: false
+            };
+
+            computer.compute();
+
+            let result = copied_input[0];
+
+            if result == target {
+                return 100 * noun + verb;
+            }
+        }
+    }
+
+    panic!();
+}
+
+struct Computer<'a> {
     step: usize,
     execution_complete: bool,
     register: &'a mut [i32]
 }
 
-impl<'a> Calculator<'a> {
+impl<'a> Computer<'a> {
     fn advance(&mut self) {
         self.step += 4;
         if self.step >= self.register.len() {
@@ -70,7 +97,7 @@ impl<'a> Calculator<'a> {
         }
     }
 
-    pub fn calculate(&mut self) {
+    pub fn compute(&mut self) {
         loop {
             if self.execution_complete {
                 break;

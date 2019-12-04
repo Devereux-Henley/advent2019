@@ -2,7 +2,7 @@
 pub fn solve_part_one(input: &mut [i32]) -> i32 {
     let mut computer = Computer {
         register: input,
-        step: 0,
+        address: 0,
         execution_complete: false
     };
 
@@ -21,7 +21,7 @@ pub fn solve_part_two(input: Vec<i32>, target: i32) -> i32 {
 
             let mut computer = Computer {
                 register: &mut copied_input,
-                step: 0,
+                address: 0,
                 execution_complete: false
             };
 
@@ -39,29 +39,29 @@ pub fn solve_part_two(input: Vec<i32>, target: i32) -> i32 {
 }
 
 struct Computer<'a> {
-    step: usize,
+    address: usize,
     execution_complete: bool,
     register: &'a mut [i32]
 }
 
 impl<'a> Computer<'a> {
     fn advance(&mut self) {
-        self.step += 4;
-        if self.step >= self.register.len() {
+        self.address += 4;
+        if self.address >= self.register.len() {
             self.execution_complete = true;
         }
     }
 
     fn get_current_opcode(&self) -> i32 {
-        self.register[self.step]
+        self.register[self.address]
     }
 
     fn process_addition(&mut self) {
-        assert!(self.register.len() > self.step + 3);
+        assert!(self.register.len() > self.address + 3);
 
-        let register_one = self.register[self.step + 1] as usize;
-        let register_two = self.register[self.step + 2] as usize;
-        let storage_register = self.register[self.step + 3] as usize;
+        let register_one = self.register[self.address + 1] as usize;
+        let register_two = self.register[self.address + 2] as usize;
+        let storage_register = self.register[self.address + 3] as usize;
 
         assert!(self.register.len() > storage_register as usize);
 
@@ -71,11 +71,11 @@ impl<'a> Computer<'a> {
     }
 
     fn process_multiplication(&mut self) {
-        assert!(self.register.len() > self.step + 3);
+        assert!(self.register.len() > self.address + 3);
 
-        let register_one = self.register[self.step + 1] as usize;
-        let register_two = self.register[self.step + 2] as usize;
-        let storage_register = self.register[self.step + 3] as usize;
+        let register_one = self.register[self.address + 1] as usize;
+        let register_two = self.register[self.address + 2] as usize;
+        let storage_register = self.register[self.address + 3] as usize;
 
         assert!(self.register.len() > storage_register as usize);
 

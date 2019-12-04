@@ -116,21 +116,21 @@ impl<'a> Computer<'a> {
 mod tests {
     #[test]
     fn given_one() {
-        assert_eq!([2, 0, 0, 0, 99], super::solve_part_one(&mut[1, 0, 0, 0, 99]))
+        assert_eq!(2, super::solve_part_one(&mut[1, 0, 0, 0, 99]))
     }
 
     #[test]
     fn given_two() {
-        assert_eq!([2, 3, 0, 6, 99], super::solve_part_one(&mut[2, 3, 0, 3, 99]))
+        assert_eq!(2, super::solve_part_one(&mut[2, 3, 0, 3, 99]))
     }
 
     #[test]
     fn given_three() {
-        assert_eq!([2, 4, 4, 5, 99, 9801], super::solve_part_one(&mut[2, 4, 4, 5, 99, 0]))
+        assert_eq!(2, super::solve_part_one(&mut[2, 4, 4, 5, 99, 0]))
     }
 
     #[test]
     fn given_four() {
-        assert_eq!([30, 1, 1, 4, 2, 5, 6, 0, 99], super::solve_part_one(&mut[1, 1, 1, 4, 99, 5, 6, 0, 99]))
+        assert_eq!(30, super::solve_part_one(&mut[1, 1, 1, 4, 99, 5, 6, 0, 99]))
     }
 }

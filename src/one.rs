@@ -6,7 +6,7 @@ pub fn solve_part_one(input: impl Iterator<Item = i32>) -> i32 {
 }
 
 fn find_fuel_for_mass(mass: i32) -> i32 {
-    mass.wrapping_div(3) - 2
+    mass / 3 - 2
 }
 
 fn find_fuel_for_mass_and_fuel(mass: i32) -> i32 {

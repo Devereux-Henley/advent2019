@@ -1,14 +1,18 @@
 mod one;
 mod two;
+mod three;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
+use std::convert::TryFrom;
 
 fn main() {
     solve_one_part_one();
     solve_one_part_two();
     solve_two_part_one();
     solve_two_part_two();
+    solve_three_part_one();
+    solve_three_part_two();
 }
 
 fn load_day_one_data() -> impl Iterator<Item = i32> {
@@ -28,6 +32,19 @@ fn load_day_two_data<'a>() -> Vec<i32> {
     data_line.split(",").map(|line| {
         line.parse::<i32>()
     }).filter(|result| result.is_ok()).map(|result| result.unwrap()).collect()
+}
+
+fn load_day_three_data() -> Vec<Vec<three::WireVector>> {
+    let file = File::open("inputs/three.txt").unwrap();
+    let mut buf_reader = BufReader::new(file);
+    buf_reader.lines().map(|line| {
+        line.unwrap()
+            .split(",")
+            .map(|wire_vector| three::WireVector::try_from(wire_vector))
+            .filter(|result| result.is_ok())
+            .map(|result| result.unwrap())
+            .collect()
+    }).collect()
 }
 
 fn solve_one_part_one() {
@@ -50,4 +67,14 @@ fn solve_two_part_one() {
 fn solve_two_part_two() {
     let data = load_day_two_data();
     println!("Day 2 Part 2 Solution: {}", two::solve_part_two(data, 19690720));
+}
+
+fn solve_three_part_one() {
+    let data = load_day_three_data();
+    println!("Day 3 Part 1 Solution: {}", three::solve_part_one(data))
+}
+
+fn solve_three_part_two() {
+    let data = load_day_three_data();
+    println!("Day 3 Part 2 Solution: {}", three::solve_part_two(data))
 }

@@ -155,39 +155,37 @@ impl Solver {
         self.wires[wire_index].push(self.cursor);
     }
 
+    fn perform_step(&mut self, wire_index: usize) {
+        self.step += 1;
+        self.examine_cursor(wire_index);
+        self.place_point(wire_index);
+    }
+
     fn trace_right(&mut self, scalar: i32, wire_index: usize) {
         for i in 0..scalar {
             self.cursor.x += 1;
-            self.step += 1;
-            self.examine_cursor(wire_index);
-            self.place_point(wire_index);
+            self.perform_step(wire_index);
         }
     }
 
     fn trace_left(&mut self, scalar: i32, wire_index: usize) {
         for i in 0..scalar {
             self.cursor.x -= 1;
-            self.step += 1;
-            self.examine_cursor(wire_index);
-            self.place_point(wire_index);
+            self.perform_step(wire_index);
         }
     }
 
     fn trace_up(&mut self, scalar: i32, wire_index: usize) {
         for i in 0..scalar {
             self.cursor.y += 1;
-            self.step += 1;
-            self.examine_cursor(wire_index);
-            self.place_point(wire_index);
+            self.perform_step(wire_index);
         }
     }
 
     fn trace_down(&mut self, scalar: i32, wire_index: usize) {
         for i in 0..scalar {
             self.cursor.y -= 1;
-            self.step += 1;
-            self.examine_cursor(wire_index);
-            self.place_point(wire_index);
+            self.perform_step(wire_index);
         }
     }
 

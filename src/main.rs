@@ -4,13 +4,14 @@ mod two;
 mod three;
 mod four;
 mod five;
+mod six;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::convert::TryFrom;
 
 fn main() {
-    solve_five_part_one();
+    solve_six_part_one();
 }
 
 fn load_day_one_data() -> impl Iterator<Item = i32> {
@@ -55,6 +56,14 @@ fn load_day_five_data<'a>() -> Vec<i32> {
     }).filter(|result| result.is_ok()).map(|result| result.unwrap()).collect()
 }
 
+fn load_day_six_data() -> Vec<six::Orbit> {
+    let file = File::open("inputs/six.txt").unwrap();
+    let buf_reader = BufReader::new(file);
+    buf_reader.lines().map(|line| {
+        six::Orbit::from(line.unwrap())
+    }).collect()
+}
+
 fn solve_one_part_one() {
     let stream = load_day_one_data();
     println!("Day 1 Part 1 Solution: {}", one::solve_part_one(stream));
@@ -95,7 +104,12 @@ fn solve_four_part_two() {
     println!("Day 4 Part 2 Solution: {}", four::solve_part_two(402328, 864247));
 }
 
-fn solve_five_part_one() {
+fn solve_five() {
     let mut data = load_day_five_data();
     five::solve_part_one(&mut data);
+}
+
+fn solve_six_part_one() {
+    let data = load_day_six_data();
+    println!("Day 6 Part 1 Solution: {}", six::solve_part_one(data));
 }

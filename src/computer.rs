@@ -183,7 +183,7 @@ impl<'a, StandardInput: BufRead, StandardOutput: Write> Computer<'a, StandardInp
         let value = self.memory[parameter_one];
         let mut output = value.to_string();
         output.push('\n');
-        self.stdout.write(output.as_bytes()).unwrap();
+        self.stdout.write_all(output.as_bytes()).unwrap();
 
         operation.opcode.instruction_size()
     }
@@ -209,7 +209,7 @@ impl<'a, StandardInput: BufRead, StandardOutput: Write> Computer<'a, StandardInp
             return 0;
         }
 
-        return operation.opcode.instruction_size()
+        operation.opcode.instruction_size()
     }
 
     fn process_less_than(&mut self, operation: &Operation) -> usize {

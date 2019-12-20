@@ -2,7 +2,7 @@
 use std::iter::Iterator;
 
 pub fn solve_part_one(input: impl Iterator<Item = i32>) -> i32 {
-    input.map(|num| find_fuel_for_mass(num)).sum()
+    input.map(find_fuel_for_mass).sum()
 }
 
 fn find_fuel_for_mass(mass: i32) -> i32 {
@@ -34,7 +34,7 @@ fn zero_negatives(value: i32) -> i32 {
 }
 
 pub fn solve_part_two(input: impl Iterator<Item = i32>) -> i32 {
-    input.map(|num| find_fuel_for_mass_and_fuel(num)).sum()
+    input.map(find_fuel_for_mass_and_fuel).sum()
 }
 
 #[cfg(test)]

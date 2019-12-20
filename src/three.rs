@@ -66,7 +66,7 @@ struct Solver {
     point_cache: HashMap<i32, HashMap<i32, Node>>
 }
 
-fn calculate_manhattan_distance(point: &Point) -> i32 {
+fn calculate_manhattan_distance(point: Point) -> i32 {
     point.x.abs() + point.y.abs()
 }
 
@@ -84,7 +84,7 @@ impl Solver {
 
     pub fn solve_for_minimum_manhattan_distance(&mut self) -> i32 {
         self.trace_points();
-        self.intersections.iter().map(|point| calculate_manhattan_distance(point)).min().unwrap()
+        self.intersections.iter().map(|&point| calculate_manhattan_distance(point)).min().unwrap()
     }
 
     pub fn solve_for_minimum_step_distance(&mut self) -> i32 {
@@ -94,9 +94,9 @@ impl Solver {
 
         for intersection in &self.intersections {
             match self.find_intersection(&intersection) {
-                Node::Single { wire_index, step } => panic!(),
+                Node::Single { .. } => panic!(),
                 Node::Intersection { wire_mappings } => {
-                    let sum = wire_mappings.iter().map(|(wire_index, step)| step).sum();
+                    let sum = wire_mappings.iter().map(|(_, step)| step).sum();
                     if sum < smallest_distance {
                         smallest_distance = sum;
                     }
@@ -162,28 +162,28 @@ impl Solver {
     }
 
     fn trace_right(&mut self, scalar: i32, wire_index: usize) {
-        for i in 0..scalar {
+        for _ in 0..scalar {
             self.cursor.x += 1;
             self.perform_step(wire_index);
         }
     }
 
     fn trace_left(&mut self, scalar: i32, wire_index: usize) {
-        for i in 0..scalar {
+        for _ in 0..scalar {
             self.cursor.x -= 1;
             self.perform_step(wire_index);
         }
     }
 
     fn trace_up(&mut self, scalar: i32, wire_index: usize) {
-        for i in 0..scalar {
+        for _ in 0..scalar {
             self.cursor.y += 1;
             self.perform_step(wire_index);
         }
     }
 
     fn trace_down(&mut self, scalar: i32, wire_index: usize) {
-        for i in 0..scalar {
+        for _ in 0..scalar {
             self.cursor.y -= 1;
             self.perform_step(wire_index);
         }

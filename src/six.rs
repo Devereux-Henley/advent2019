@@ -19,7 +19,7 @@ pub struct Orbit {
     orbiter: String
 }
 
-impl<'a> From<String> for Orbit {
+impl From<String> for Orbit {
     fn from(value: String) -> Self {
         let parts: Vec<&str> = value.split(')').collect();
 
@@ -32,74 +32,60 @@ impl<'a> From<String> for Orbit {
 
 #[derive(Debug)]
 struct InterstellarNode {
-    orbitees: Vec<usize>,
-    orbiters: Vec<usize>
+    orbitees: Vec<String>,
+    orbiters: Vec<String>
 }
 
 struct InterstellarMap {
-    nodes: Vec<InterstellarNode>,
-    starmap: HashMap<String, usize>
+    starmap: HashMap<String, InterstellarNode>
 }
 
 impl InterstellarMap {
     pub fn new(orbits: &[Orbit]) -> Self {
-        let mut nodes: Vec<InterstellarNode> = vec![];
-        let mut mappings: HashMap<String, usize> = HashMap::new();
+        let mut mappings: HashMap<String, InterstellarNode> = HashMap::new();
 
         for orbit in orbits {
             if mappings.contains_key(&orbit.orbiter) && mappings.contains_key(&orbit.orbitee) {
-                let orbiter_index = mappings.get(&orbit.orbiter).unwrap();
-                let orbitee_index = mappings.get(&orbit.orbitee).unwrap();
-                nodes[*orbiter_index].orbitees.push(*orbitee_index);
-                nodes[*orbitee_index].orbiters.push(*orbiter_index);
+                let orbiter = mappings.get_mut(&orbit.orbiter).unwrap();
+                orbiter.orbitees.push(orbit.orbitee.clone());
+
+                let orbitee = mappings.get_mut(&orbit.orbitee).unwrap();
+                orbitee.orbiters.push(orbit.orbiter.clone());
             } else if mappings.contains_key(&orbit.orbiter) {
-                let orbitee_index = nodes.len();
-                let orbiter_index = *mappings.get(&orbit.orbiter).unwrap();
-                mappings.insert(orbit.orbitee.clone(), orbitee_index);
-
-                nodes.push(InterstellarNode {
+                mappings.insert(orbit.orbitee.clone(), InterstellarNode {
                     orbitees: vec![],
-                    orbiters: vec![orbiter_index]
+                    orbiters: vec![orbit.orbiter.clone()]
                 });
 
-                nodes[orbiter_index].orbitees.push(orbitee_index);
+                let orbiter = mappings.get_mut(&orbit.orbiter).unwrap();
+                orbiter.orbitees.push(orbit.orbitee.clone());
             } else if mappings.contains_key(&orbit.orbitee) {
-                let orbiter_index = nodes.len();
-                let orbitee_index = *mappings.get(&orbit.orbitee).unwrap();
-
-                mappings.insert(orbit.orbiter.clone(), nodes.len());
-
-                nodes.push(InterstellarNode {
-                    orbitees: vec![*mappings.get(&orbit.orbitee).unwrap()],
+                mappings.insert(orbit.orbiter.clone(), InterstellarNode {
+                    orbitees: vec![orbit.orbitee.clone()],
                     orbiters: vec![]
                 });
 
-                nodes[orbitee_index].orbiters.push(orbiter_index);
+                let orbitee = mappings.get_mut(&orbit.orbitee).unwrap();
+                orbitee.orbiters.push(orbit.orbiter.clone());
             } else {
-                let orbitee_index = nodes.len();
-                let orbiter_index = orbitee_index + 1;
-                nodes.push(InterstellarNode {
+                mappings.insert(orbit.orbitee.clone(), InterstellarNode {
                     orbitees: vec![],
-                    orbiters: vec![orbiter_index]
+                    orbiters: vec![orbit.orbiter.clone()]
                 });
 
-                nodes.push(InterstellarNode {
-                    orbitees: vec![orbitee_index],
+                mappings.insert(orbit.orbiter.clone(), InterstellarNode {
+                    orbitees: vec![orbit.orbitee.clone()],
                     orbiters: vec![]
                 });
-
-                mappings.insert(orbit.orbitee.clone(), orbitee_index);
-                mappings.insert(orbit.orbiter.clone(), orbiter_index);
             }
         }
 
         InterstellarMap {
-            nodes,
             starmap: mappings
         }
     }
 
-    fn iteratively_get_orbits(&self, orbitees: &[usize]) -> i32 {
+    fn iteratively_get_orbits(&self, orbitees: &[String]) -> i32 {
         let mut sum = 0;
         let mut current;
         let mut stack = vec![orbitees];
@@ -108,7 +94,7 @@ impl InterstellarMap {
             current = stack.pop().unwrap();
 
             for orbitee in current {
-                stack.push(&self.nodes[*orbitee].orbitees);
+                stack.push(&self.starmap[orbitee].orbitees);
             }
 
             sum += current.len() as i32;
@@ -119,80 +105,82 @@ impl InterstellarMap {
 
     // Dijkstra implementation for shortest path.
     pub fn find_shortest_path(&self, node_one_name: &str, node_two_name: &str) -> i32 {
-        let node_one = *self.starmap.get(node_one_name).unwrap();
-        let node_two = *self.starmap.get(node_two_name).unwrap();
-        let mut distances: HashMap<usize, i32> = HashMap::new();
-        let mut previous: HashMap<usize, usize> = HashMap::new();
+        let mut distances: HashMap<String, i32> = HashMap::new();
+        let mut previous: HashMap<String, String> = HashMap::new();
 
-        distances.insert(node_one, 0);
+        distances.insert(node_one_name.to_string(), 0);
 
         let mut alt;
-        let mut set: HashSet<usize> = (0..self.nodes.len()).collect();
+        let mut set: HashSet<String> = self.starmap.iter().map(|(key, _)| key.clone()).collect();
 
         // Evaluate every node once.
         while !set.is_empty()  {
 
             // Find a node with smallest distance.
-            let node_index = *set.iter().fold(None, |acc_option, key_in_set| {
-                if acc_option.is_none() {
-                    return Some(key_in_set);
+            let mut node_key_ref: Option<&String> = None;
+
+            for key in &set {
+                if node_key_ref.is_none() {
+                    node_key_ref = Some(key);
                 }
 
-                let acc = acc_option.unwrap();
+                let node = node_key_ref.unwrap();
 
-                Some(
-                    match distances.get(&acc) {
-                        Some(value) => match distances.get(&key_in_set) {
-                            Some(acc_value) => if value < acc_value { key_in_set } else { acc },
-                            None => acc
-                        },
-                        None => key_in_set
-                    })
-            }).unwrap();
+                match distances.get(node) {
+                    Some(value) => match distances.get(key) {
+                        Some(acc_value) => if value < acc_value { node_key_ref = Some(key) },
+                        None => ()
+                    },
+                    None => node_key_ref = Some(key)
+                }
+            }
 
-            // Remove this node from further evaluation.
-            set.remove(&node_index);
+            let node_key: &String = node_key_ref.unwrap();
 
-            let node = &self.nodes[node_index];
+            let node = &self.starmap.get(node_key).unwrap();
 
             // Update distances for all orbitees.
             for orbitee in &node.orbitees {
-                alt = match distances.get(&node_index) {
+                alt = match distances.get(node_key) {
                     Some(value) => value + 1,
-                    None => panic!("This shouldn't happen: {}, {:?}", node_index, distances)
+                    None => panic!("This shouldn't happen: {}, {:?}", node_key, distances)
                 };
 
-                let compare = match distances.get(&orbitee) {
+                let compare = match distances.get(orbitee) {
                     Some(value) => *value,
                     None => std::i32::MAX
                 };
 
                 if alt < compare {
-                    distances.insert(*orbitee, alt);
-                    previous.insert(*orbitee, node_index);
+                    distances.insert(orbitee.clone(), alt);
+                    previous.insert(orbitee.clone(), node_key.clone());
                 }
             }
 
             // Update distances for all orbiters.
             for orbiter in &node.orbiters {
-                alt = match distances.get(&node_index) {
+                alt = match distances.get(node_key) {
                     Some(value) => value + 1,
-                    None => panic!("This shouldn't happen: {}, {:?}", node_index, distances)
+                    None => panic!("This shouldn't happen: {}, {:?}", node_key, distances)
                 };
 
-                let compare = match distances.get(&orbiter) {
+                let compare = match distances.get(orbiter) {
                     Some(value) => *value,
                     None => std::i32::MAX
                 };
 
                 if alt < compare {
-                    distances.insert(*orbiter, alt);
-                    previous.insert(*orbiter, node_index);
+                    distances.insert(orbiter.clone(), alt);
+                    previous.insert(orbiter.clone(), node_key.clone());
                 }
             }
+
+            // Remove this node from further evaluation.
+            let set_key = node_key.clone();
+            set.remove(&set_key);
         }
 
-        let mut target = &node_two;
+        let mut target = node_two_name;
         let mut distance = 0;
 
         // If we did not pass the node, it is disconnected and cannot be reached.
@@ -213,7 +201,7 @@ impl InterstellarMap {
     pub fn get_orbits(&self) -> i32 {
         let mut count = 0;
 
-        for node in &self.nodes {
+        for (_, node) in self.starmap.iter() {
             count += self.iteratively_get_orbits(&node.orbitees)
         }
 
